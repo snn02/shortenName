@@ -33,15 +33,66 @@ function anonymizePersonalData(string $text): string
         $text
     ) ?? $text;
 
+    [$text, $protected] = protectNameSegments($text);
+
     $text = preg_replace_callback(
         '/\b[А-ЯЁ][а-яё]+(?:\s+[А-ЯЁ][а-яё]+){0,2}\b/u',
         static function (array $matches): string {
+            $stopWords = [
+                'Телефон',
+                'Контакты',
+                'Клиент',
+                'Контактное',
+                'Лицо',
+                'ИП',
+            ];
+
+            if (strpos($matches[0], ' ') === false && in_array($matches[0], $stopWords, true)) {
+                return $matches[0];
+            }
+
             return formatNameWithSurnameInitial($matches[0]);
         },
         $text
     ) ?? $text;
 
+    if (!empty($protected)) {
+        $text = strtr($text, $protected);
+    }
+
     return $text;
+}
+
+function protectNameSegments(string $text): array
+{
+    $protected = [];
+    $index = 0;
+
+    $text = preg_replace_callback(
+        '/\([^)]*\)/u',
+        static function (array $matches) use (&$protected, &$index): string {
+            $token = "__PROTECTED_BLOCK_{$index}__";
+            $protected[$token] = $matches[0];
+            $index++;
+
+            return $token;
+        },
+        $text
+    ) ?? $text;
+
+    $text = preg_replace_callback(
+        '/\bИП\s+[А-ЯЁ][а-яё]+(?:\s+[А-ЯЁ][а-яё]+){0,2}\b/u',
+        static function (array $matches) use (&$protected, &$index): string {
+            $token = "__PROTECTED_BLOCK_{$index}__";
+            $protected[$token] = $matches[0];
+            $index++;
+
+            return $token;
+        },
+        $text
+    ) ?? $text;
+
+    return [$text, $protected];
 }
 ?>
 <!DOCTYPE html>
