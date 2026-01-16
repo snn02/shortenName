@@ -65,10 +65,16 @@ function formatNameWithSurnameInitial(string $fullName): string
 
 function isPatronymic(string $value): bool
 {
-    return (bool) preg_match('/(вич|вна|ович|евич|овна|евна|ична|ыныч|ич)$/iu', $value);
+    return (bool) preg_match(
+        '/(вич|вна|ович|евич|овна|евна|ична|ыныч|ич|оглы|уулу|кызы|кизи|гизи)$/iu',
+        $value
+    );
 }
 
 function isSurnameLikely(string $value): bool
 {
-    return (bool) preg_match('/(ов|ев|ёв|ин|ын|ский|ская|ко|ук|юк|енко|ич|ыч|цева|ова|ева|ина|ына)$/iu', $value);
+    return (bool) preg_match(
+        '/(ов|ев|ёв|ин|ын|ский|ская|ко|ук|юк|енко|ич|ыч|цева|ова|ева|ина|ына|ян|янц|дзе|швили|ия|ули|оглы|уулу)$/iu',
+        $value
+    );
 }
